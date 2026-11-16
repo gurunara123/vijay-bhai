@@ -1,6 +1,5 @@
-
-export const firebaseConfig = {
-  apiKey: "AIzaSyAyJ7c0_UkmqRLH2QDJCFNVabnuws31LGI",
+const firebaseConfig = {
+  apiKey: "AIzaSyAyJ7cO_UkmqRLH2QDJCFNVabnuws31lGI",
   authDomain: "vijay-bhai-landing.firebaseapp.com",
   projectId: "vijay-bhai-landing",
   storageBucket: "vijay-bhai-landing.firebasestorage.app",
