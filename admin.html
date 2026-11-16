@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vijay Bhai - Admin Panel</title>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:20px;font-family:Arial,sans-serif;background:linear-gradient(135deg,#0860d5,#087cf4 55%,#0755c8);color:#222}
+.card{width:min(100%,460px);background:#fff;border-radius:24px;padding:28px;box-shadow:0 18px 40px #003b8c66}
+h1{margin:0 0 8px;color:#087c50;font-size:27px}p{color:#59616b;line-height:1.5}
+label{display:block;font-weight:700;margin:18px 0 7px}input{width:100%;padding:14px;border:1px solid #cbd5e1;border-radius:11px;font-size:15px}
+button{width:100%;padding:14px;border:0;border-radius:12px;background:#0aaa61;color:white;font-size:17px;font-weight:800;margin-top:18px;cursor:pointer}
+button.secondary{background:#075bc7}button:disabled{opacity:.6;cursor:wait}
+.status{margin-top:16px;padding:12px;border-radius:10px;background:#eff6ff;color:#174579;word-break:break-word}
+.hidden{display:none}.hint{font-size:13px;color:#64748b}.top{display:flex;justify-content:space-between;align-items:center;gap:10px}.top a{font-size:13px;color:#075bc7}
+</style>
+</head>
+<body>
+<main class="card">
+  <div class="top"><h1>Vijay Bhai Admin</h1><a href="./index.html">Open Landing Page</a></div>
+  <p>Yahan se WhatsApp Group Invite Link badlein. Save karte hi public landing page par naya link use hoga.</p>
+
+  <section id="loginSection">
+    <label for="email">Admin Email</label><input id="email" type="email" autocomplete="username" placeholder="admin@example.com">
+    <label for="password">Password</label><input id="password" type="password" autocomplete="current-password" placeholder="Firebase admin password">
+    <button id="loginBtn">Login</button>
+  </section>
+
+  <section id="panelSection" class="hidden">
+    <div class="status" id="loggedInAs"></div>
+    <label for="groupLink">WhatsApp Group Invite Link</label>
+    <input id="groupLink" type="url" placeholder="https://chat.whatsapp.com/....">
+    <button id="saveBtn">Save WhatsApp Link</button>
+    <button id="logoutBtn" class="secondary">Logout</button>
+  </section>
+  <div class="status" id="status" role="status">Firebase setup complete hone ke baad admin login karein.</div>
+  <p class="hint">Security: Admin account Firebase Authentication mein manually create karein. Public visitors ko admin password kabhi na dein.</p>
+</main>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { firebaseConfig } from "./firebase-config.js";
+
+const status = document.getElementById("status");
+const loginSection = document.getElementById("loginSection");
+const panelSection = document.getElementById("panelSection");
+const loginBtn = document.getElementById("loginBtn");
+const saveBtn = document.getElementById("saveBtn");
+let auth, db;
+
+try {
+  if (!firebaseConfig || !firebaseConfig.apiKey || firebaseConfig.apiKey === "YOUR_API_KEY") {
+    throw new Error("firebase-config.js mein Firebase config values add karein.");
+  }
+  const app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  db = getFirestore(app);
+
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      loginSection.classList.add("hidden");
+      panelSection.classList.remove("hidden");
+      document.getElementById("loggedInAs").textContent = "Logged in: " + user.email;
+      try {
+        const snap = await getDoc(doc(db, "settings", "landing"));
+        if (snap.exists()) document.getElementById("groupLink").value = snap.data().groupLink || "";
+        status.textContent = "Login successful. Link update kar sakte hain.";
+      } catch (e) { status.textContent = "Data read error: " + e.message; }
+    } else {
+      loginSection.classList.remove("hidden");
+      panelSection.classList.add("hidden");
+    }
+  });
+
+  loginBtn.addEventListener("click", async () => {
+    status.textContent = "Logging in...";
+    loginBtn.disabled = true;
+    try {
+      await signInWithEmailAndPassword(auth, document.getElementById("email").value.trim(), document.getElementById("password").value);
+      status.textContent = "Login successful.";
+    } catch (e) { status.textContent = "Login error: " + e.message; }
+    finally { loginBtn.disabled = false; }
+  });
+
+  saveBtn.addEventListener("click", async () => {
+    const link = document.getElementById("groupLink").value.trim();
+    if (!link.startsWith("https://chat.whatsapp.com/")) {
+      status.textContent = "Valid WhatsApp group invite link paste karein (https://chat.whatsapp.com/...).";
+      return;
+    }
+    saveBtn.disabled = true;
+    status.textContent = "Saving...";
+    try {
+      await setDoc(doc(db, "settings", "landing"), { groupLink: link, updatedAt: new Date().toISOString() }, { merge: true });
+      status.textContent = "Saved! Ab public landing page par naya WhatsApp link use hoga.";
+    } catch (e) {
+      status.textContent = "Save error: " + e.message + " | Firestore Rules mein apna Admin UID check karein.";
+    } finally { saveBtn.disabled = false; }
+  });
+
+  document.getElementById("logoutBtn").addEventListener("click", async () => {
+    await signOut(auth);
+    status.textContent = "Logged out.";
+  });
+} catch (e) {
+  status.textContent = "Setup required: " + e.message;
+}
+</script>
+</body></html>

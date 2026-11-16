@@ -1,0 +1,69 @@
+VIJAY BHAI WHATSAPP LANDING PAGE + SECURE ADMIN PANEL
+Files: index.html, admin.html, firebase-config.js, FIRESTORE_RULES.txt
+
+WHAT THIS DOES
+- Same blue WhatsApp landing page design.
+- 10-second countdown + glowing/pulsing Join button.
+- After 10 seconds it attempts to open the WhatsApp invite link.
+- Admin panel at /admin.html lets you update the group link without editing website files.
+- The admin login is protected by Firebase Authentication + Firestore Security Rules.
+
+IMPORTANT: GitHub Pages is static hosting. To securely edit a public site's link from an admin panel,
+this package uses Firebase as the backend. Do NOT put passwords or private service keys in HTML/JS.
+
+STEP 1 - CREATE FIREBASE PROJECT
+1. Open https://console.firebase.google.com/
+2. Click Add project; name it e.g. vijay-bhai-landing.
+3. After project is created, click the Web icon </> (Add app).
+4. Register app; Firebase shows a config object. Copy its values.
+5. Open firebase-config.js in Notepad/editor and replace YOUR_API_KEY, YOUR_PROJECT_ID,
+   YOUR_MESSAGING_SENDER_ID, YOUR_APP_ID with your real values. Save.
+
+STEP 2 - ENABLE ADMIN LOGIN
+1. Firebase Console > Build > Authentication > Get started.
+2. Sign-in method > Email/Password > Enable > Save.
+3. Authentication > Users > Add user.
+4. Create your admin email and a strong password. Keep password private.
+5. Open that user and copy its UID.
+
+STEP 3 - CREATE FIRESTORE
+1. Firebase Console > Build > Firestore Database > Create database.
+2. Choose Production mode and create database.
+3. Open Rules tab.
+4. Open FIRESTORE_RULES.txt from this package.
+5. Replace YOUR_ADMIN_UID with the UID copied in Step 2.
+6. Paste the complete rules into Firestore Rules and click Publish.
+
+STEP 4 - TEST LOCALLY (optional)
+- Keep all files in one folder.
+- Because Firebase modules need a web server, do not test by double-clicking index.html.
+- Deploy to GitHub Pages first, then test the live URL.
+
+STEP 5 - UPLOAD TO GITHUB PAGES
+1. Sign in at https://github.com/ and create a New repository, e.g. vijay-bhai-landing.
+2. For easiest setup, choose Public repository.
+3. Upload these four files to the repository root:
+   index.html, admin.html, firebase-config.js, FIRESTORE_RULES.txt
+   (You can upload README too; no need to upload a ZIP.)
+4. Repository > Settings > Pages.
+5. Under Build and deployment, choose Deploy from a branch.
+6. Select branch main and folder /(root), then Save.
+7. Wait for GitHub Pages to publish. Your site will be:
+   https://YOUR-GITHUB-USERNAME.github.io/vijay-bhai-landing/
+8. Admin page:
+   https://YOUR-GITHUB-USERNAME.github.io/vijay-bhai-landing/admin.html
+
+STEP 6 - ADD OR CHANGE WHATSAPP GROUP LINK
+1. Open your live admin URL ending in /admin.html.
+2. Login with the admin email/password created in Firebase.
+3. Paste your invite URL: https://chat.whatsapp.com/...
+4. Click Save WhatsApp Link.
+5. Done. No need to edit files or redeploy for future group-link changes.
+
+NOTES / TROUBLESHOOTING
+- Firebase config values in firebase-config.js are web app config, not admin passwords. Firestore Rules protect writes.
+- Do not publish your Firebase admin password or service-account private key.
+- If Save fails with permission-denied, check that YOUR_ADMIN_UID in Firestore Rules exactly matches the Firebase Authentication UID.
+- If the page says Firebase config missing, check firebase-config.js values and ensure the file is uploaded.
+- Add your GitHub Pages domain in Firebase Authentication > Settings > Authorized domains if sign-in is blocked.
+- Some mobile browsers block automatic app launch; the JOIN button remains available as manual fallback.

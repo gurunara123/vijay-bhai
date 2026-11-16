@@ -1,0 +1,17 @@
+FIRESTORE SECURITY RULES
+Firebase Console > Firestore Database > Rules mein ye rules paste karein.
+IMPORTANT: YOUR_ADMIN_UID ko apne Firebase Authentication admin user ke UID se replace karein.
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /settings/landing {
+      allow read: if true;
+      allow create, update: if request.auth != null
+        && request.auth.uid == "YOUR_ADMIN_UID"
+        && request.resource.data.groupLink is string
+        && request.resource.data.groupLink.matches('https://chat\\.whatsapp\\.com/.*');
+      allow delete: if false;
+    }
+  }
+}
